@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#define LINUX
-#ifdef LINUX
-#include <unistd.h>
-#else
-#include "windows.h"
-#endif
+#include <Windows.h>
+#include <string.h>
 
 typedef struct _StructScore {
 	int total_score;
@@ -19,52 +15,63 @@ StructScore ranks[100];
 void sortScore();
 void clearScreen();
 void waitMilliseconds(unsigned long milliseconds);
-StructScore playGame(unsigned long milliseconds);
+StructScore playGame(unsigned int seconds);
 void addRank(StructScore score);
 void printRank();
+void swapInteger(int *a, int *b);
+void swapString(char a[], char b[]);
+int getRankLength();
 
 int main(void) {
-	int i;
+	int i, selection, currentUserIndex=0;
+	srand(time(NULL));
 	for(i = 0; i < 100; i++)
 		ranks[i].total_score = -1;
-	srand(time(NULL));
-	playGame(100000);
+	for(;;){
+		printf("play game: 0, see rank: 1\nType here: ");
+		scanf("%d", &selection);
+		if(selection) {
+			sortScore();
+			printRank();
+		}else{
+			ranks[currentUserIndex++] = playGame(10);
+		}
+	}
 	return 0;
 }
 
 void clearScreen() {
-#ifdef LINUX
-	system("clear");
-	return;
-#else
 	system("cls");
-#endif
 }
 
 void waitMilliseconds(unsigned long milliseconds) {
-#ifdef LINUX
-	usleep(milliseconds);
-#else
-	sleep(milliseconds);
-#endif
+	clock_t currentTime = clock();
+	while (clock() - currentTime < milliseconds);
 }
 
-StructScore playGame(unsigned long milliseconds) {
+StructScore playGame(unsigned int seconds) {
 	StructScore score;
 	score.total_score = 0;
-	int cache_score, gamePlayCount, timerOverall;
-	char nextChapterVar;
+	int cache_score, gamePlayCount;
+	unsigned int timer;
 	for(gamePlayCount = 0; gamePlayCount < 3; gamePlayCount++) {
-		timerOverall = clock();
-		while (clock() - timerOverall < milliseconds) {
+		cache_score = 0;
+		for(;;){
+			timer = clock();
+			while (clock() - timer < seconds) {
+				Sleep(1); // hack for optimization
+				while (_kbhit())
+					if(getch() == 32)
+						goto out;
+			}
+			cache_score = (cache_score + 1)%10;
 			clearScreen();
-			cache_score = rand()%10+1;
-			printf("%3d\n", cache_score);
-			waitMilliseconds(20000);
+			printf("Enter to get: %d\n", cache_score);
 		}
-		printf("Your Score: %d\nType Any key and press enter to continue.\n", cache_score);
-		scanf("%c", &nextChapterVar);
+		out:
+		printf("You've got %d points!", cache_score);
 		score.total_score += cache_score;
+		Sleep(1500);
 	}
 	clearScreen();
 	printf("Your total score = %d\n", score.total_score);
@@ -73,21 +80,46 @@ StructScore playGame(unsigned long milliseconds) {
 	return score;
 }
 
-void addRank(StructScore score) {
-	int cursor;
-	for(cursor = 0; cursor < 100; cursor++)
-		if(ranks[cursor].total_score == -1)
+void swapInteger(int *a, int *b) {
+	int temp;
+	temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
+void swapString(char a[], char b[]) {
+	char temp[10];
+	strcpy(temp, a);
+	strcpy(a, b);
+	strcpy(b, temp);
+}
+int getRankLength() { // linear search
+	int length;
+	for(length = 0; length<100;length++)
+		if(ranks[length].total_score == -1)
 			break;
-	// find where to add new score information
-	
-	ranks[cursor] = score;
+	return length;
+}
+
+void sortScore() {
+	int temp, i, j, len = getRankLength();
+	for(i = 0; i < len-1; i++) {
+		for(j = i + 1; j < len; j++) {
+			if(ranks[i].total_score < ranks[j].total_score) {
+				swapInteger(&ranks[i].total_score, &ranks[j].total_score);
+				swapString(ranks[i].nickname, ranks[j].nickname);
+			}
+		}
+	}
+}
+
+void addRank(StructScore score) {
+	ranks[getRankLength()+1] = score;
 }
 
 void printRank() {
 	int i;
-	for(i = 0; i < 100; i++) {
-		if(ranks[i].total_score == -1)
-			break;
+	for(i = 0; i < getRankLength(); i++)
 		printf("Rank %d\t| nickname: %s, score: %d\n", i+1, ranks[i].nickname, ranks[i].total_score);
-	}
 }
+
