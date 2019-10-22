@@ -66,7 +66,7 @@ StructScore playGame(unsigned int seconds) {
 			}
 			cache_score = (cache_score + 1)%10;
 			clearScreen();
-			printf("Enter to get: %d\n", cache_score);
+			printf("Press space to get: %d\n", cache_score);
 		}
 		out:
 		printf("You've got %d points!", cache_score);
@@ -106,7 +106,7 @@ void sortScore() {
 	for(i = 0; i < len-1; i++) {
 		for(j = i + 1; j < len; j++) {
 			if(ranks[i].total_score < ranks[j].total_score) {
-				swapInteger(&ranks[i].total_score, &ranks[j].total_score);
+		print		swapInteger(&ranks[i].total_score, &ranks[j].total_score);
 				swapString(ranks[i].nickname, ranks[j].nickname);
 			}
 		}
