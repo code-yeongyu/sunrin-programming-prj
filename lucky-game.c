@@ -27,9 +27,10 @@ int main(void) {
 	for(i = 0; i < 100; i++)
 		ranks[i].total_score = -1;
 	for(;;){
-		printf("play game: 0, see rank: 1\nType here: ");
+		printf("play game: 0 | get rank: 1\nType here: ");
 		scanf("%d", &selection);
 		if(selection) {
+			clearScreen();
 			sortScore();
 			printRank();
 		}else
@@ -91,20 +92,17 @@ int getRankLength() { // linear search
 	for(length = 0; length<100;length++)
 		if(ranks[length].total_score == -1)
 			break;
-	printf("\n---%d---\n", length);
 	return length;
 }
 
 void sortScore() {
 	int i, j, len = getRankLength();
-	for(i = 0; i < len-1; i++) {
-		for(j = i + 1; j < len; j++) {
+	for(i = 0; i < len-1; i++)
+		for(j = i + 1; j < len; j++)
 			if(ranks[i].total_score < ranks[j].total_score) {
 				swapInteger(&ranks[i].total_score, &ranks[j].total_score);
 				swapString(ranks[i].nickname, ranks[j].nickname);
 			}
-		}
-	}
 }
 
 void addRank(StructScore score) {
@@ -116,3 +114,5 @@ void printRank() {
 	for(i = 0; i < getRankLength(); i++)
 		printf("Rank %d\t| nickname: %s, score: %d\n", i+1, ranks[i].nickname, ranks[i].total_score);
 }
+
+
