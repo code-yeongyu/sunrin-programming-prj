@@ -14,7 +14,6 @@ StructScore ranks[100];
 
 void sortScore();
 void clearScreen();
-void waitMilliseconds(unsigned long milliseconds);
 StructScore playGame(unsigned int seconds);
 void addRank(StructScore score);
 void printRank();
@@ -23,7 +22,7 @@ void swapString(char a[], char b[]);
 int getRankLength();
 
 int main(void) {
-	int i, selection, currentUserIndex=0;
+	int i, selection;
 	srand(time(NULL));
 	for(i = 0; i < 100; i++)
 		ranks[i].total_score = -1;
@@ -33,20 +32,14 @@ int main(void) {
 		if(selection) {
 			sortScore();
 			printRank();
-		}else{
-			ranks[currentUserIndex++] = playGame(10);
-		}
+		}else
+			addRank(playGame(10));
 	}
 	return 0;
 }
 
 void clearScreen() {
 	system("cls");
-}
-
-void waitMilliseconds(unsigned long milliseconds) {
-	clock_t currentTime = clock();
-	while (clock() - currentTime < milliseconds);
 }
 
 StructScore playGame(unsigned int seconds) {
@@ -98,15 +91,16 @@ int getRankLength() { // linear search
 	for(length = 0; length<100;length++)
 		if(ranks[length].total_score == -1)
 			break;
+	printf("\n---%d---\n", length);
 	return length;
 }
 
 void sortScore() {
-	int temp, i, j, len = getRankLength();
+	int i, j, len = getRankLength();
 	for(i = 0; i < len-1; i++) {
 		for(j = i + 1; j < len; j++) {
 			if(ranks[i].total_score < ranks[j].total_score) {
-		print		swapInteger(&ranks[i].total_score, &ranks[j].total_score);
+				swapInteger(&ranks[i].total_score, &ranks[j].total_score);
 				swapString(ranks[i].nickname, ranks[j].nickname);
 			}
 		}
@@ -114,7 +108,7 @@ void sortScore() {
 }
 
 void addRank(StructScore score) {
-	ranks[getRankLength()+1] = score;
+	ranks[getRankLength()] = score;
 }
 
 void printRank() {
@@ -122,4 +116,3 @@ void printRank() {
 	for(i = 0; i < getRankLength(); i++)
 		printf("Rank %d\t| nickname: %s, score: %d\n", i+1, ranks[i].nickname, ranks[i].total_score);
 }
-
